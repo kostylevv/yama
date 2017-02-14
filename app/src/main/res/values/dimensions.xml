@@ -1,0 +1,8 @@
+<resources>
+    <dimen name="card_margin">5dp</dimen>
+    <dimen name="card_radius">0dp</dimen>
+    <dimen name="poster_height">160dp</dimen>
+    <dimen name="movie_title_height">48dp</dimen>
+    <dimen name="movie_title">16sp</dimen>
+    <dimen name="movie_title_padding">12dp</dimen>
+</resources>

@@ -1,7 +1,13 @@
 package com.kostylevv.yama;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
+
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,16 +20,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kostylevv.yama.R.color.colorAccent;
+
 /**
  * This class used to request MBD API, parse JSON request and return list of movies
  */
-public class FetchMoviesTask {
+public class MovieFetcher {
+    private static Context c;
     /**
      *
      * @param - sort param value
      * @return
      */
-    public static List<Movie> fetch(String... params) {
+    public static List<Movie> fetch(Context context, String... params) {
+        c = context;
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
         HttpURLConnection urlConnection = null;
@@ -35,22 +45,20 @@ public class FetchMoviesTask {
         // Will contain the result
         List<Movie> result = new ArrayList<Movie>();
 
-        //Movie.setSortBy(params[0]);//FIXME
+        String sortBy = params[0];
 
         try {
 
             //Base URL for MDB API
             final String BASE_URL_PARAM = "http://api.themoviedb.org/3/discover/movie";
 
-            //API KEY should be in file "secrets.properties" in the app root folder
             final String API_KEY_PARAM = "api_key";
 
             //Sort parameter name
             final String SORT_NAME = "sort_by";
 
             Uri.Builder buildUri = Uri.parse(BASE_URL_PARAM).buildUpon()
-                    //.appendQueryParameter(SORT_NAME, params[0]) // FIXME: 14/02/2017
-                    .appendQueryParameter(SORT_NAME, "popularity.desc")
+                    .appendQueryParameter(SORT_NAME, sortBy)
                     .appendQueryParameter(API_KEY_PARAM, BuildConfig.MOVIEDB_API_KEY);
 
             URL url = new URL(buildUri.toString());
@@ -158,10 +166,44 @@ public class FetchMoviesTask {
             movie.setReleaseDate(movieJson.getString(MDB_RELEASE_DATE));
             movie.setVote_average(movieJson.getDouble(MDB_VOTE_AVG));
 
+            Palette palette = null;
+
+            /**
+             *
+             */
+
+
+
+
+            try {
+                Bitmap bitmap = Picasso.with(c).load(movie.getPoster()).get();
+                palette = Palette.from(bitmap).generate();
+
+                Palette.Swatch vibrant = checkVibrantSwatch(palette);
+                if (vibrant != null) {
+                    movie.setBackgroundColor(vibrant.getRgb());
+                    movie.setTextColor(vibrant.getTitleTextColor());
+                }
+
+            } catch (IOException ioe) {
+                Log.e("YAMA", ioe.getMessage());
+            } catch (IllegalStateException ise) {
+                Log.e("YAME", ise.getMessage());
+                movie.setBackgroundColor(R.color.colorPrimary);
+                movie.setTextColor(R.color.textColor);
+            }
+
             result.add(movie);
 
         }
         return result;
+    }
+
+    private static Palette.Swatch checkVibrantSwatch(Palette p) {
+        Palette.Swatch vibrant = p.getVibrantSwatch();
+        if (vibrant != null) {
+            return vibrant;
+        } else throw new IllegalStateException("Swatches returned NULL ");
     }
 }
 

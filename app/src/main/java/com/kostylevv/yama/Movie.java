@@ -2,12 +2,13 @@ package com.kostylevv.yama;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v7.graphics.Palette;
 
 /**
  * Created by vkostylev on 14/02/2017.
  */
 
-public class Movie {
+public class Movie implements Parcelable {
 
         public Movie () {}
 
@@ -16,31 +17,6 @@ public class Movie {
             this.poster = null;
         }
 
-
-        private int mData;
-
-        public int describeContents() {
-            return 0;
-        }
-
-        public void writeToParcel(Parcel out, int flags) {
-            out.writeInt(mData);
-        }
-
-        public static final Parcelable.Creator<Movie> CREATOR
-                = new Parcelable.Creator<Movie>() {
-            public Movie createFromParcel(Parcel in) {
-                return new Movie(in);
-            }
-
-            public Movie[] newArray(int size) {
-                return new Movie[size];
-            }
-        };
-
-        private Movie(Parcel in) {
-            mData = in.readInt();
-        }
 
         @Override
         public String toString() {
@@ -91,11 +67,62 @@ public class Movie {
             this.vote_average = vote_average;
         }
 
+        public int getBackgroundColor() {return this.backgroundColor;}
+
+        public int getTextColor() {return this.textColor;}
+
+        public void setBackgroundColor(int color) {
+            this.backgroundColor = color;
+        }
+
+        public void setTextColor(int color) {
+            this.textColor = color;
+        }
+
         private String title;
         private String poster;
         private String overview;
         private double vote_average;
         private String releaseDate;
+        private int backgroundColor;
+        private int textColor;
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.poster);
+        dest.writeString(this.overview);
+        dest.writeDouble(this.vote_average);
+        dest.writeString(this.releaseDate);
+        dest.writeInt(this.backgroundColor);
+        dest.writeInt(this.textColor);
+    }
+
+    protected Movie(Parcel in) {
+        this.title = in.readString();
+        this.poster = in.readString();
+        this.overview = in.readString();
+        this.vote_average = in.readDouble();
+        this.releaseDate = in.readString();
+        this.backgroundColor = in.readInt();
+        this.textColor = in.readInt();
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel source) {
+            return new Movie(source);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 }
